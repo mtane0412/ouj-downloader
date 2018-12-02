@@ -3,6 +3,8 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const consoleColor = require('./consoleColor');
 
+let browser, page;
+
 const login = async () => {
     console.log('ログイン中...');
     browser = await puppeteer.launch();
@@ -56,7 +58,7 @@ const loginInput = async (status) => {
     // 遷移後のurlを入力
     let url = await page.url();
 
-    // ログインできなかったときは最初に戻る
+    // ログインできなかったときは入力し直す
     if (url !== 'https://vod.ouj.ac.jp/view/ouj/') return loginInput('error');
 
     await page.goto('https://vod.ouj.ac.jp/v1/tenants/1/');
