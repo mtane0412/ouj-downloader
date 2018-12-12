@@ -119,3 +119,4 @@ base-categories.json
 categories.json
 vod-contents.json
 *.mp4
+*.srt

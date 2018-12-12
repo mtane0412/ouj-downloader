@@ -1,6 +1,8 @@
 'use strict';
+const fs = require('fs');
 const rtmpdump = require('rtmpdump');
 const ffmpeg = require('fluent-ffmpeg');
+const addSubtitle = require(`./addSubtitle`);
 
 let i = 0;
 const downloader = async (downloadList) => {
@@ -10,18 +12,22 @@ const downloader = async (downloadList) => {
         authTicket,
         summary,
         detail,
+        subject,
         duration,
         alias,
-        fileType
+        fileType,
+        addSubtitles
     } = downloadList[i];
 
-    let [subject, artist] = detail.split('\n');
-    artist = artist.replace(/　/g, ' ').replace(/\,/g, ', ');
+    const artist = detail.split('\n')[1].replace(/　/g, ' ').replace(/\,/g, ', ');
     const options = {
         rtmp: `rtmpe://vod-st.ouj.ac.jp:80/classtream?authTicket=${authTicket}&mp4:1/${contentId}.${fileType}`,
         playpath: `mp4:1/${contentId}.mp4`,
         swfVfy: 'https://vod.ouj.ac.jp/classtream-player/v1.2/js/video-js/5.12.6/video-js.swf'
     };
+
+    // 保存directoryを作成
+    if (!fs.existsSync(`./${subject}`)) fs.mkdirSync(`./${subject}`);
 
     const stream = rtmpdump.createStream(options);
 
@@ -37,26 +43,29 @@ const downloader = async (downloadList) => {
             '-metadata', `episode_id=${alias}`,
             '-y')
         .on('start', cmdline => {
-            // console.log('Command line: ' + cmdline);
-        })
-        .on('codecData', data => {
-            //const duration = data.duration;
+            //console.log('Command line: ' + cmdline);
         })
         .on('progress', progress => {
             const progressPercent = Math.round((progress.timemark.slice(3, 5) / (duration / 60)) * 100)
-            process.stdout.write(`Downloading ${title}: ${progressPercent}%\r`);
+            process.stdout.write(`\rDownloading ${title}: ${progressPercent}%`);
         })
         .on('error', (err, stdout, stderr) => {
             console.log(err);
             console.log('ffmpeg stdout: ' + stdout);
             console.log('ffmpeg stderr: ' + stderr);
         })
-        .save(`${subject} ${title}.mp4`)
+        .save(`${subject}/${title}.mp4`)
         .on('end', async () => {
-            console.log(`Downloading ${title}: 100% completed`);
+            await console.log(`\rDownloading ${title}: 100% completed`);
             i++;
             if (i < downloadList.length) return downloader(downloadList);
-            else return console.log('ダウンロードが完了しました。');
+            else {
+                console.log('ダウンロードが完了しました。');
+                if (downloadList[0].addSubtitles) {
+                    await console.log('字幕動画の作成を開始します。')
+                    await addSubtitle(downloadList);
+                };
+            }
         })
 }
 

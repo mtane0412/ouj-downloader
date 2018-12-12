@@ -5,6 +5,7 @@ const inquirer = require('inquirer');
 //require('events').EventEmitter.defaultMaxListeners = 15;
 const login = require('./login');
 const getAPI = require('./getAPI');
+const smi2srt = require('./smi2srt')
 const consoleColor = require('./consoleColor');
 
 let cookies, categories, vodContents, baseCategories, downloadList;
@@ -98,9 +99,6 @@ const confirmSubject = async (result) => {
             if (answers.confirm) {
                 return result.categoryId;
             } else {
-                // 選択された科目をリセット
-                // categoryId = 0;
-                //return result.method();
                 return interactive();
             }
         })
@@ -147,9 +145,14 @@ const addTicket = async (downloadList, cookies) => {
     // downloadList が空のときはundefinedを返す
     if (downloadList.length === 0) return;
 
-    // authTicketとexistsSamiFileを downloadList に追加
+    // subject, authTicket, existsSamiFile を downloadList に追加
     process.stdout.write('ダウンロードリストを取得中...');
+    let addSubtitles;
     for (let i = 0; i < downloadList.length; i++) {
+        // subject を追加
+        downloadList[i].subject = downloadList[i].detail.split('\n')[0];
+
+        // authTciket, existsSamiFile を追加
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
         await page.setCookie(...cookies);
@@ -161,9 +164,47 @@ const addTicket = async (downloadList, cookies) => {
                 existsSamiFile: videosrc.existsSamiFile
             };
         })));
+
+        // 字幕があるとき
+        if (downloadList[i].existsSamiFile) {
+            // 字幕オプション未選択時
+            if (addSubtitles === undefined) {
+                await inquirer
+                    .prompt([{
+                        type: 'list',
+                        name: 'subtitles',
+                        message: '字幕オプションを選択してください',
+                        choices: [{
+                            name: '字幕あり(raw動画+字幕動画+字幕ファイル(.srt))',
+                            value: true
+                        }, {
+                            name: '字幕なし(raw動画)',
+                            value: false
+                        }]
+                    }])
+                    .then(async answers => addSubtitles = answers.subtitles)
+            }
+            if (addSubtitles) {
+                // 字幕ファイル(.srt)をダウンロード
+                await page.goto(`https://vod.ouj.ac.jp/v1/tenants/1/vod-contents/${downloadList[i].contentId}/sami`);
+                const smi = await page.evaluate(() => {
+                    return document.querySelector("body").innerHTML;
+                });
+                const srt = smi2srt(smi);
+                // 保存directoryを作成
+                if (!fs.existsSync(`./${downloadList[i].subject}`)) fs.mkdirSync(`./${downloadList[i].subject}`);
+                // 字幕保存directoryを作成
+                if (!fs.existsSync(`./${downloadList[i].subject}/subtitles`)) fs.mkdirSync(`./${downloadList[i].subject}/subtitles`);
+
+                fs.writeFileSync(`${downloadList[i].subject}/subtitles/${downloadList[i].title}.srt`, srt);
+                downloadList[i] = Object.assign(downloadList[i], {
+                    addSubtitles: true
+                });
+            }
+        }
         await browser.close();
     }
-    console.log('完了');
+    console.log('ダウンロードを開始します。');
     return downloadList;
 }
 
@@ -204,7 +245,6 @@ const init = async () => {
 
     await interactive();
     const result = await addTicket(downloadList, cookies);
-    console.log('ログアウトしました。');
     return result;
 }
 
