@@ -64,7 +64,7 @@ const loginInput = async (status) => {
     await page.goto('https://vod.ouj.ac.jp/v1/tenants/1/');
     console.log('ログイン完了');
 
-    // パスワードをcredentialsに保存する
+    // パスワードを .credentials に保存する
     if (!process.env.USERNAME || !process.env.PASSWORD || process.env.USERNAME !== USERNAME || process.env.PASSWORD !== PASSWORD) {
         await inquirer
             .prompt([{
@@ -74,7 +74,7 @@ const loginInput = async (status) => {
                 default: false
             }])
             .then(answers => {
-                if (answers.save) fs.writeFileSync(__dirname + '.credentials', `USERNAME='${USERNAME}'\nPASSWORD='${PASSWORD}'`);
+                if (answers.save) fs.writeFileSync(__dirname + '/.credentials', `USERNAME='${USERNAME}'\nPASSWORD='${PASSWORD}'`);
             })
     }
     return page.cookies();

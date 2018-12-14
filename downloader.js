@@ -12,14 +12,15 @@ const downloader = async (downloadList) => {
         authTicket,
         summary,
         detail,
-        subject,
         duration,
         alias,
         fileType,
-        addSubtitles
+        addSubtitles,
+        subject,
+        cast
     } = downloadList[i];
 
-    const artist = detail.split('\n')[1].replace(/　/g, ' ').replace(/\,/g, ', ');
+    const artist = cast.join(',');
     const options = {
         rtmp: `rtmpe://vod-st.ouj.ac.jp:80/classtream?authTicket=${authTicket}&mp4:1/${contentId}.${fileType}`,
         playpath: `mp4:1/${contentId}.mp4`,

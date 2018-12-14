@@ -118,5 +118,6 @@ typings/
 base-categories.json
 categories.json
 vod-contents.json
+downloadAPI.json
 *.mp4
 *.srt

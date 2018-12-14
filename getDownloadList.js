@@ -8,7 +8,7 @@ const getAPI = require('./getAPI');
 const smi2srt = require('./smi2srt')
 const consoleColor = require('./consoleColor');
 
-let cookies, categories, vodContents, baseCategories, downloadList;
+let cookies, categories, vodContents, baseCategories, downloadList, downloadAPI;
 let categoryId = 0;
 
 const selectCategory = async () => {
@@ -105,7 +105,6 @@ const confirmSubject = async (result) => {
 }
 
 const selectChapters = async (categoryId) => {
-    categoryId = categoryId;
     const videos = vodContents.filter(video => video.categoryId === categoryId).sort((a, b) => a.alias - b.alias)
     const checkList = videos.map(video => ({
         name: video.title,
@@ -149,9 +148,6 @@ const addTicket = async (downloadList, cookies) => {
     process.stdout.write('ダウンロードリストを取得中...');
     let addSubtitles;
     for (let i = 0; i < downloadList.length; i++) {
-        // subject を追加
-        downloadList[i].subject = downloadList[i].detail.split('\n')[0];
-
         // authTciket, existsSamiFile を追加
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
@@ -239,8 +235,9 @@ const init = async () => {
         categories = JSON.parse(fs.readFileSync(__dirname + '/categories.json', 'utf8'));
         vodContents = JSON.parse(fs.readFileSync(__dirname + '/vod-contents.json', 'utf8'));
         baseCategories = JSON.parse(fs.readFileSync(__dirname + '/base-categories.json', 'utf8'));
+        downloadAPI = JSON.parse(fs.readFileSync(__dirname + '/downloadAPI.json', 'utf8'));
     } catch (error) {
-        await getAPI();
+        [categories, vodContents, baseCategories, downloadAPI] = await getAPI(cookies);
     }
 
     await interactive();
