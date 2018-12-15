@@ -2,11 +2,13 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const inquirer = require('inquirer');
-//require('events').EventEmitter.defaultMaxListeners = 15;
 const login = require('./login');
 const getAPI = require('./getAPI');
 const smi2srt = require('./smi2srt')
 const consoleColor = require('./consoleColor');
+
+const path = require('path');
+const appDir = path.resolve(__dirname, '../');
 
 let cookies, categories, vodContents, baseCategories, downloadList, downloadAPI;
 let categoryId = 0;
@@ -187,15 +189,22 @@ const addTicket = async (downloadList, cookies) => {
                     return document.querySelector("body").innerHTML;
                 });
                 const srt = smi2srt(smi);
-                // 保存directoryを作成
-                if (!fs.existsSync(`./${downloadList[i].subject}`)) fs.mkdirSync(`./${downloadList[i].subject}`);
-                // 字幕保存directoryを作成
-                if (!fs.existsSync(`./${downloadList[i].subject}/subtitles`)) fs.mkdirSync(`./${downloadList[i].subject}/subtitles`);
+                if (srt.match(/<img/gi) === null) {
+                    /* 通常の字幕のとき */
+                    // 保存directoryを作成
+                    if (!fs.existsSync(`./${downloadList[i].subject}`)) fs.mkdirSync(`./${downloadList[i].subject}`);
+                    // 字幕保存directoryを作成
+                    if (!fs.existsSync(`./${downloadList[i].subject}/subtitles`)) fs.mkdirSync(`./${downloadList[i].subject}/subtitles`);
 
-                fs.writeFileSync(`${downloadList[i].subject}/subtitles/${downloadList[i].title}.srt`, srt);
-                downloadList[i] = Object.assign(downloadList[i], {
-                    addSubtitles: true
-                });
+                    fs.writeFileSync(`${downloadList[i].subject}/subtitles/${downloadList[i].title}.srt`, srt);
+                    downloadList[i] = Object.assign(downloadList[i], {
+                        addSubtitles: true
+                    });
+                } else {
+                    /* 字幕が画像のとき */
+                    console.log(consoleColor.red + "字幕が画像で作られているため変換できませんでした。" + consoleColor.reset);
+                    addSubtitles = false;
+                }
             }
         }
         await browser.close();
@@ -232,10 +241,10 @@ const init = async () => {
 
     // API読み込み
     try {
-        categories = JSON.parse(fs.readFileSync(__dirname + '/categories.json', 'utf8'));
-        vodContents = JSON.parse(fs.readFileSync(__dirname + '/vod-contents.json', 'utf8'));
-        baseCategories = JSON.parse(fs.readFileSync(__dirname + '/base-categories.json', 'utf8'));
-        downloadAPI = JSON.parse(fs.readFileSync(__dirname + '/downloadAPI.json', 'utf8'));
+        categories = JSON.parse(fs.readFileSync(appDir + '/categories.json', 'utf8'));
+        vodContents = JSON.parse(fs.readFileSync(appDir + '/vod-contents.json', 'utf8'));
+        baseCategories = JSON.parse(fs.readFileSync(appDir + '/base-categories.json', 'utf8'));
+        downloadAPI = JSON.parse(fs.readFileSync(appDir + '/downloadAPI.json', 'utf8'));
     } catch (error) {
         [categories, vodContents, baseCategories, downloadAPI] = await getAPI(cookies);
     }

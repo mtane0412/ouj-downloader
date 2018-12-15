@@ -1,5 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const path = require('path');
+const appDir = path.resolve(__dirname, '../');
 
 const getAPI = async (cookies) => {
     const browser = await puppeteer.launch();
@@ -64,13 +66,13 @@ const getAPI = async (cookies) => {
         // 各授業の担当講師を追加
         switch (vodContents[i].detail.split(/\r\n|\r|\n/).length) {
             case 4:
-                vodContents[i].cast = vodContents[i].detail.split(/\r\n|\r|\n/)[2].split(','); 
+                vodContents[i].cast = vodContents[i].detail.split(/\r\n|\r|\n/)[2].split(',');
                 break;
             case 3:
-                vodContents[i].cast = vodContents[i].detail.split(/\r\n|\r|\n/)[1].split(','); 
+                vodContents[i].cast = vodContents[i].detail.split(/\r\n|\r|\n/)[1].split(',');
                 break;
             case 2:
-                vodContents[i].cast = vodContents[i].detail.split(/\r\n|\r|\n/)[0].split(','); 
+                vodContents[i].cast = vodContents[i].detail.split(/\r\n|\r|\n/)[0].split(',');
                 break;
             default:
                 vodContents[i].cast = vodContents[i].detail;
@@ -84,10 +86,10 @@ const getAPI = async (cookies) => {
     }, {});
 
     // APIをローカルに保存
-    await fs.writeFileSync(__dirname + '/categories.json', JSON.stringify(categories));
-    await fs.writeFileSync(__dirname + '/vod-contents.json', JSON.stringify(vodContents));
-    await fs.writeFileSync(__dirname + '/base-categories.json', JSON.stringify(baseCategories));
-    await fs.writeFileSync(__dirname + '/downloadAPI.json', JSON.stringify(downloadAPI));
+    await fs.writeFileSync(appDir + '/categories.json', JSON.stringify(categories));
+    await fs.writeFileSync(appDir + '/vod-contents.json', JSON.stringify(vodContents));
+    await fs.writeFileSync(appDir + '/base-categories.json', JSON.stringify(baseCategories));
+    await fs.writeFileSync(appDir + '/downloadAPI.json', JSON.stringify(downloadAPI));
 
     console.log('完了');
 
