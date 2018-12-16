@@ -37,6 +37,8 @@ Commands:
 ```
 
 ## Release History
+- 0.1.3
+  - bugfix: fix scrolling through the chapter selection.
 - 0.1.2
   - Remove console.time
 - 0.1.1

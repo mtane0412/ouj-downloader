@@ -114,7 +114,7 @@ const selectChapters = async (categoryId) => {
         short: video.alias,
         checked: true
     }))
-    return inquirer
+    await inquirer
         .prompt([{
             type: 'checkbox',
             name: 'downloadList',
@@ -122,9 +122,10 @@ const selectChapters = async (categoryId) => {
             choices: checkList
         }])
         .then(async answers => {
-            downloadList = answers.downloadList;
-            // 1つも選択されなかったとき
-            if (downloadList.length === 0) {
+            if (answers.downloadList.length > 0) {
+                downloadList = answers.downloadList;
+            } else {
+                // 1つも選択されなかったとき
                 await inquirer
                     .prompt([{
                         type: 'confirm',
@@ -202,7 +203,7 @@ const addTicket = async (downloadList, cookies) => {
                     });
                 } else {
                     /* 字幕が画像のとき */
-                    console.log(consoleColor.red + downloadList[i].title + "は字幕が画像で作られているため変換できませんでした。" + consoleColor.reset);
+                    console.log(consoleColor.red + `「${downloadList[i].title}」は字幕が画像で作られているため変換できませんでした。` + consoleColor.reset);
                 }
             }
         }
