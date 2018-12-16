@@ -150,7 +150,6 @@ const addTicket = async (downloadList, cookies) => {
     process.stdout.write('ダウンロードリストを取得中...');
     let addSubtitles;
     for (let i = 0; i < downloadList.length; i++) {
-        console.time("time");
         // authTciket, existsSamiFile を追加
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
@@ -208,7 +207,6 @@ const addTicket = async (downloadList, cookies) => {
             }
         }
         await browser.close();
-        console.timeEnd("time");
     }
     console.log('ダウンロードを開始します。');
     return downloadList;

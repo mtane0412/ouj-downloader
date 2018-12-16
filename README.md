@@ -37,6 +37,8 @@ Commands:
 ```
 
 ## Release History
+- 0.1.2
+  - Remove console.time
 - 0.1.1
   - Fix exception handling to image subtitles
 - 0.1.0
