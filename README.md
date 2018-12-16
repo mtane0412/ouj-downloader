@@ -37,10 +37,12 @@ Commands:
 ```
 
 ## Release History
+- 0.1.1
+  - Fix exception handling to image subtitles
 - 0.1.0
-    - The first proper release
+  - The first proper release
 - 0.0.1
-    - Work in progress
+  - Work in progress
 
 ## License
 GPL-3.0
