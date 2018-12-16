@@ -1,6 +1,6 @@
 {
   "name": "ouj-downloader",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "The CLI tool to download the streaming video/audio of the Open University of Japan.",
   "bin": {
     "ouj-downloader": "bin/index.js"
