@@ -3,12 +3,12 @@ The CLI tool to download the streaming video/audio of the Open University of Jap
 
 
 ## Installation
-You need to build ffmpeg with libass.
+You need to build ffmpeg.
 
 macOS:
 
 ```bash
-$ brew install ffmpeg --with-libass
+$ brew install ffmpeg
 ```
 
 and install this package.
