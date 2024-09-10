@@ -1,3 +1,6 @@
+# Deprecated
+It no longer works because OUJ has changed its specifications.
+
 # OUJ downloader
 The CLI tool to download the streaming video/audio of the Open University of Japan.
 
